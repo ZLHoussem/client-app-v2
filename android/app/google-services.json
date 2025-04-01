@@ -1,0 +1,67 @@
+{
+  "project_info": {
+    "project_number": "429184313188",
+    "project_id": "transporteur-aeefc",
+    "storage_bucket": "transporteur-aeefc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:429184313188:android:46b27bca5cb35c02bdfc71",
+        "android_client_info": {
+          "package_name": "com.example.bladi_go_chouffeur"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSsy539eh2RRIZBEcjTwJDtbbo28Ib-DY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:429184313188:android:7c482d517d4d84afbdfc71",
+        "android_client_info": {
+          "package_name": "com.example.bladi_go_client"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSsy539eh2RRIZBEcjTwJDtbbo28Ib-DY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:429184313188:android:036332e6aca3a9cbbdfc71",
+        "android_client_info": {
+          "package_name": "com.example.transporteur"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBSsy539eh2RRIZBEcjTwJDtbbo28Ib-DY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
