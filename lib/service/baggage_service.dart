@@ -9,13 +9,10 @@ import 'package:http_parser/http_parser.dart' show MediaType;
 import 'package:image/image.dart' as img;
 import 'package:flutter/material.dart'; // For debugPrint
 
-// Keep ArticleData definition accessible or redefine if needed
-// If it's used across features, consider moving it to a 'models' directory
-
 class BaggageService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   // Make uploadUrl configurable or constant
-  static const String _uploadUrl = 'http://192.168.1.6:5000/upload';
+  static const String _uploadUrl = 'http://192.168.1.156:5000/upload';
   // Consider making the FCM key a configurable constant
 
   static const String _fcmServerKey = 'BIGJTQVQk-CHbM6ZqaKxhmLjRVh_lLUKUtIeTBJfgPMhbKOKIUXwWpy2IOmD4WAL3T4NbuvPy7QAOMBC7qA-LkQ'; 
