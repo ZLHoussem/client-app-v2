@@ -2,6 +2,7 @@
 import 'package:bladi_go_client/pages/Home.dart';
 import 'package:bladi_go_client/pages/notification.dart';
 import 'package:bladi_go_client/pages/signin.dart';
+import 'package:bladi_go_client/provider/search_state.dart';
 import 'package:bladi_go_client/provider/user.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -72,7 +73,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => UserProvider())],
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        
+        ChangeNotifierProvider(create: (context) => SearchState()), // <-- PROVIDER HERE
+      ],
       child: MaterialApp(
         navigatorKey: navigatorKey, // Add the navigatorKey here
         debugShowCheckedModeBanner: false,
@@ -127,6 +132,7 @@ class MyApp extends StatelessWidget {
           '/notification_screen': (context) => const NotificationScreen(),
         },
       ),
+        
     );
   }
 }

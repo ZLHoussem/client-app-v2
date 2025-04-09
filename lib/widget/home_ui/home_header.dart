@@ -20,7 +20,7 @@ class HomeHeader extends StatelessWidget {
       child: Stack(
         children: [
           Image.asset(
-            'assets/images/bg.jpg', // Consider defining assets paths as constants
+            'assets/images/bg.png', // Consider defining assets paths as constants
             fit: BoxFit.cover,
             width: double.infinity,
             height: double.infinity,

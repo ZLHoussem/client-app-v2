@@ -1,77 +1,97 @@
-// models/trajet_models.dart
+// lib/models/trajet_models.dart
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+// --- Trajet Class (Keep previous fixes including routePreview) ---
 class Trajet {
   final String id;
-  final String value; // e.g., "Paris → Lyon"
-  final String style; // e.g., "Bateau" or "Avion"
-  final String date; // e.g., "YYYY/MM/DD"
   final String chauffeurId;
-  final String? pickup; // Derived
-  final String? delivery; // Derived
+  final String date; // YYYY/MM/DD string
+  final String transportType;
+  final String? style; // Keep if different from transportType
+  final String? value; // Purpose still unclear, ensure handled if nullable
+  final String? routePreview; // Keep this addition
+  final List<String> specificPickupPoints;
+  final List<String> specificDeliveryPoints;
+  final String status;
+  // final Timestamp timestamp; // Add back if you parse the timestamp string from Firestore
 
   Trajet({
     required this.id,
-    required this.value,
-    required this.style,
-    required this.date,
     required this.chauffeurId,
-    this.pickup,
-    this.delivery,
+    required this.date,
+    required this.transportType,
+    this.style,
+    this.value, // Handle null in widgets if necessary
+    this.routePreview,
+    required this.specificPickupPoints,
+    required this.specificDeliveryPoints,
+    required this.status,
+    // this.timestamp,
   });
 
   factory Trajet.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    final valueParts = (data['value'] as String?)?.split(' → ');
+    List<String> _dynamicListToStringList(List<dynamic>? dynamicList) {
+      return dynamicList?.whereType<String>().toList() ?? []; // Simpler/Safer way
+    }
+
     return Trajet(
       id: doc.id,
-      value: data['value'] ?? 'N/A',
-      style: data['style'] ?? 'N/A',
-      date: data['date'] ?? 'N/A', // Keep as String from Firestore
       chauffeurId: data['chauffeurId'] ?? '',
-      pickup: valueParts != null && valueParts.isNotEmpty ? valueParts[0] : null,
-      delivery: valueParts != null && valueParts.length > 1 ? valueParts[1] : null,
+      date: data['date'] ?? '', // YYYY/MM/DD string
+      transportType: data['transportType'] ?? '',
+      style: data['style'], // Only if different from transportType
+      value: data['value'], // Allow null
+      routePreview: data['routePreview'],
+      specificPickupPoints: _dynamicListToStringList(data['specificPickupPoints']),
+      specificDeliveryPoints: _dynamicListToStringList(data['specificDeliveryPoints']),
+      status: data['status'] ?? 'inconnu',
+      // timestamp: data['timestamp'], // If parsing timestamp string later
     );
   }
 }
 
+
+// --- Chauffeur Class (MODIFIED) ---
 class Chauffeur {
   final String id;
-  final String name;
-  final String lastName;
-  final String vehicle;
-  final String vehicleColor;
-  final String? vehicleImageUrl; // Make nullable if it can be missing
+  final String nom;
+  final String prenom;
+  final String telephone;
+  // Removed: vehicleImageUrl, vehicle, vehicleColor
 
-  String get fullName => '$name $lastName'.trim();
+  // Add other relevant chauffeur fields available in Firestore
 
   Chauffeur({
     required this.id,
-    required this.name,
-    required this.lastName,
-    required this.vehicle,
-    required this.vehicleColor,
-    this.vehicleImageUrl,
+    required this.nom,
+    required this.prenom,
+    required this.telephone,
+    // other fields...
   });
 
+  // Add a getter for full name
+  String get fullName => '$prenom $nom'.trim();
+
   factory Chauffeur.fromFirestore(DocumentSnapshot doc) {
-    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
-    return Chauffeur(
-      id: doc.id,
-      name: data['name'] ?? 'Inconnu',
-      lastName: data['lastName'] ?? '',
-      vehicle: data['vehicle'] ?? 'N/A',
-      vehicleColor: data['vehicleColor'] ?? 'N/A',
-      vehicleImageUrl: data['vehicleImageUrl'], // Can be null
-    );
+     Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+     return Chauffeur(
+        id: doc.id,
+        nom: data['nom'] ?? '',
+        prenom: data['prenom'] ?? '',
+        telephone: data['telephone'] ?? '',
+        // Map other fields...
+     );
   }
 }
 
-// Combined Model for UI Display
+
+// --- TrajetDisplayData Class (Keep as is) ---
 class TrajetDisplayData {
   final Trajet trajet;
   final Chauffeur chauffeur;
-  final DateTime dateTime; // Actual DateTime object for sorting/comparison
+  final DateTime dateTime; // Parsed date for filtering/sorting
 
   TrajetDisplayData({
     required this.trajet,

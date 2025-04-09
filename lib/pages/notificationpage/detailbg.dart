@@ -1,13 +1,13 @@
-import 'package:bladi_go_client/provider/user.dart';
+
 import 'package:flutter/material.dart';
-import 'package:carousel_slider/carousel_slider.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:bladi_go_client/pages/notificationpage/detail_screen.dart';
 import 'package:bladi_go_client/widget/title.dart';
 import 'package:bladi_go_client/pages/notificationpage/proposa.dart'; 
 // Import the modification screen (adjust the path as needed)
 import 'package:bladi_go_client/pages/baggage_screen.dart' as ModifyScreen;
-import 'package:provider/provider.dart'; 
+
 
 class ModernBaggageScreen extends StatefulWidget {
   final String? userId;
@@ -118,8 +118,8 @@ class _ModernBaggageScreenState extends State<ModernBaggageScreen> {
       final chauffeurName = results[1] as String;
 
       if (trajetDetails['date'] == widget.selectedDate &&
-          trajetDetails['collectionPoint'] == widget.collectionPoint &&
-          trajetDetails['deliveryPoint'] == widget.deliveryPoint) {
+          data['from'] == widget.collectionPoint &&
+          data['to'] == widget.deliveryPoint) {
         Color statusColor;
         switch (status) {
           case 'En attente':
@@ -169,7 +169,7 @@ class _ModernBaggageScreenState extends State<ModernBaggageScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context, listen: false);
+  
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: const TitleApp(text: "Vos bagages", retour: true),
@@ -200,7 +200,7 @@ class _ModernBaggageScreenState extends State<ModernBaggageScreen> {
                         MaterialPageRoute(
                           builder: (context) => ChauffeurProposalScreen(
                             chauffeurId: proposalItem['chauffeurId'],
-                            userId: userProvider.userId,
+                           
                             trajetId: proposalItem['trajetId'],
                             collectionPoint: proposalItem['collectionPoint'],
                             deliveryPoint: proposalItem['deliveryPoint'],
@@ -370,15 +370,13 @@ class BaggageCard extends StatefulWidget {
   @override
   State<BaggageCard> createState() => _BaggageCardState();
 }
-
 class _BaggageCardState extends State<BaggageCard> {
-  final CarouselController carouselController = CarouselController();
+  final PageController pageController = PageController();
   int currentImageIndex = 0;
-
+  
   @override
   Widget build(BuildContext context) {
     final Color blackWithOpacity = Colors.black.withAlpha((0.8 * 255).toInt());
-
 
     return Container(
       margin: const EdgeInsets.only(bottom: 20),
@@ -418,113 +416,175 @@ class _BaggageCardState extends State<BaggageCard> {
             Stack(
               alignment: Alignment.center,
               children: [
-                CarouselSlider(
-                  options: CarouselOptions(
-                    height: 220,
-                    enlargeCenterPage: true,
-                    enableInfiniteScroll: widget.images.length > 1,
-                    viewportFraction: 1.0,
-                    onPageChanged: (index, reason) {
+                SizedBox(
+                  height: 220,
+                  child: PageView.builder(
+                    controller: pageController,
+                    itemCount: widget.images.isNotEmpty ? widget.images.length : 1,
+                    onPageChanged: (index) {
                       setState(() {
                         currentImageIndex = index;
                       });
                     },
-                  ),
-                  items: widget.images.isNotEmpty
-                      ? widget.images.map((imageUrl) {
-                          return Builder(
-                            builder: (BuildContext context) {
-                              return Container(
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  color: Colors.grey.shade100,
+                    itemBuilder: (context, index) {
+                      if (widget.images.isEmpty) {
+                        return Container(
+                          width: double.infinity,
+                          height: 220,
+                          color: Colors.grey.shade200,
+                          child: Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.image_not_supported_outlined,
+                                  color: Colors.grey.shade400,
+                                  size: 40,
                                 ),
-                                child: Image.network(
-                                  imageUrl,
-                                  fit: BoxFit.cover,
-                                  loadingBuilder: (context, child, loadingProgress) {
-                                    if (loadingProgress == null) return child;
-                                    return const Center(child: CircularProgressIndicator());
-                                  },
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      color: Colors.grey.shade200,
-                                      child: Center(
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            Icon(
-                                              Icons.image_not_supported_outlined,
-                                              color: Colors.grey.shade400,
-                                              size: 40,
-                                            ),
-                                            const SizedBox(height: 8),
-                                            Text(
-                                              'Image non disponible',
-                                              style: TextStyle(
-                                                color: Colors.grey.shade700,
-                                                fontWeight: FontWeight.w500,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Aucune image disponible',
+                                  style: TextStyle(
+                                    color: Colors.grey.shade700,
+                                    fontWeight: FontWeight.w500,
+                                  ),
                                 ),
-                              );
-                            },
-                          );
-                        }).toList()
-                      : [
-                          Container(
-                            width: double.infinity,
-                            height: 220,
-                            color: Colors.grey.shade200,
-                            child: Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.image_not_supported_outlined,
-                                    color: Colors.grey.shade400,
-                                    size: 40,
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'Aucune image disponible',
-                                    style: TextStyle(
-                                      color: Colors.grey.shade700,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ],
-                              ),
+                              ],
                             ),
                           ),
-                        ],
+                        );
+                      }
+                      
+                      return Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                        ),
+                        child: Image.network(
+                          widget.images[index],
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return const Center(child: CircularProgressIndicator());
+                          },
+                          errorBuilder: (context, error, stackTrace) {
+                            return Container(
+                              color: Colors.grey.shade200,
+                              child: Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.image_not_supported_outlined,
+                                      color: Colors.grey.shade400,
+                                      size: 40,
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      'Image non disponible',
+                                      style: TextStyle(
+                                        color: Colors.grey.shade700,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      );
+                    },
+                  ),
                 ),
+                
+                // Navigation arrows for scrolling
                 if (widget.images.length > 1) ...[
+                  // Left arrow
+                  Positioned(
+                    left: 10,
+                    child: GestureDetector(
+                      onTap: () {
+                        if (currentImageIndex > 0) {
+                          pageController.previousPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        }
+                      },
+                      child: Container(
+                        height: 40,
+                        width: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.3),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.arrow_back_ios_new,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                  
+                  // Right arrow
+                  Positioned(
+                    right: 10,
+                    child: GestureDetector(
+                      onTap: () {
+                        if (currentImageIndex < widget.images.length - 1) {
+                          pageController.nextPage(
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          );
+                        }
+                      },
+                      child: Container(
+                        height: 40,
+                        width: 40,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.3),
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.arrow_forward_ios,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+                
+                // Dots indicator at the bottom
+                if (widget.images.length > 1)
                   Positioned(
                     bottom: 10,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: widget.images.asMap().entries.map((entry) {
-                        return Container(
-                          width: 8.0,
-                          height: 8.0,
-                          margin: const EdgeInsets.symmetric(horizontal: 3.0),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: currentImageIndex == entry.key
-                                ? Colors.white
-                                : Colors.white.withOpacity(0.5),
+                        return GestureDetector(
+                          onTap: () => pageController.animateToPage(
+                            entry.key,
+                            duration: const Duration(milliseconds: 300),
+                            curve: Curves.easeInOut,
+                          ),
+                          child: Container(
+                            width: 8.0,
+                            height: 8.0,
+                            margin: const EdgeInsets.symmetric(horizontal: 3.0),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: currentImageIndex == entry.key
+                                  ? Colors.white
+                                  : Colors.white.withOpacity(0.5),
+                            ),
                           ),
                         );
                       }).toList(),
                     ),
                   ),
-                ],
               ],
             ),
             Padding(
@@ -569,5 +629,11 @@ class _BaggageCardState extends State<BaggageCard> {
         ),
       ),
     );
+  }
+  
+  @override
+  void dispose() {
+    pageController.dispose();
+    super.dispose();
   }
 }

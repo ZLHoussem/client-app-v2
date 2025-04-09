@@ -6,6 +6,7 @@ import 'dart:developer'; // For log
 import 'package:bladi_go_client/models/article_data.dart';            // Model
 import 'package:bladi_go_client/notification/notification.api.dart';
 import 'package:bladi_go_client/pages/home.dart';                     // Navigation Target
+import 'package:bladi_go_client/provider/search_state.dart';
 import 'package:bladi_go_client/provider/user.dart';                  // User Info
 import 'package:bladi_go_client/service/baggage_service.dart';        // Backend Service
 
@@ -76,10 +77,11 @@ class _ModernBaggageScreenState extends State<ModernBaggageScreen> {
   // Ensure the string format passed to the widget is consistent.
   void _parseLocations() {
      // Using '→' as per the original code. Ensure this is reliable.
-     final locationParts = widget.locations.split('→');
-     _startLocation = locationParts.isNotEmpty ? locationParts[0].trim() : 'N/A';
-     // Check length before accessing index 1
-     _endLocation = locationParts.length > 1 ? locationParts[1].trim() : 'N/A';
+final searchState = context.read<SearchState>(); // Or Provider.of<SearchState>(context, listen: false);
+
+// Assign the values from the provider
+_startLocation = searchState.from;
+_endLocation = searchState.to;
      log("Parsed locations: $_startLocation -> $_endLocation");
   }
 
@@ -239,7 +241,10 @@ class _ModernBaggageScreenState extends State<ModernBaggageScreen> {
         chauffeurId: widget.chauffeurId,
         trajetId: widget.trajetId,
         articles: articles,
+        from:_startLocation,
+        to: _endLocation, 
         existingBaggageId: widget.baggageId,
+
       );
     // Use context.read for one-time reads inside callbacks/functions
    

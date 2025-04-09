@@ -3,6 +3,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'dart:convert';
 import 'package:bladi_go_client/models/article_data.dart';
+import 'package:bladi_go_client/provider/search_state.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart' show MediaType;
@@ -12,7 +13,7 @@ import 'package:flutter/material.dart'; // For debugPrint
 class BaggageService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   // Make uploadUrl configurable or constant
-  static const String _uploadUrl = 'http://192.168.1.156:5000/upload';
+  static const String _uploadUrl = 'http://noc80080s4s0wokk4oc4sgog.82.112.242.233.sslip.io/upload';
   // Consider making the FCM key a configurable constant
 
   static const String _fcmServerKey = 'BIGJTQVQk-CHbM6ZqaKxhmLjRVh_lLUKUtIeTBJfgPMhbKOKIUXwWpy2IOmD4WAL3T4NbuvPy7QAOMBC7qA-LkQ'; 
@@ -172,10 +173,12 @@ class BaggageService {
       required String userId,
       required String chauffeurId,
       required String trajetId,
+       required String from, required String to,
+
       required List<ArticleData> articles,
       String? existingBaggageId, // Use this to determine create vs update
   }) async {
-
+        
       // 1. Prepare baggage items (uploading new images)
       final List<Map<String, dynamic>> baggageItemsForFirestore = [];
       try {
@@ -204,7 +207,7 @@ class BaggageService {
            debugPrint("Error during image upload preparation: $e");
            throw Exception("Failed to upload one or more images. Please try again. Details: $e"); // Propagate error
       }
-
+    
 
       // 2. Create or Update Firestore document
        final baggageData = {
@@ -212,7 +215,9 @@ class BaggageService {
           'chauffeurId': chauffeurId,
           'items': baggageItemsForFirestore,
           'trajetId': trajetId,
-          'status': 'En attente', // Reset status on update? Or handle differently?
+          'status': 'En attente', 
+          'from':from,
+          'to':to,// Reset status on update? Or handle differently?
           'timestamp': FieldValue.serverTimestamp(),
        };
 

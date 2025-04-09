@@ -52,23 +52,35 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
     });
 
     try {
+      String url =
+          "http://twsoss4s0wgwgo8gcsk404sk.82.112.242.233.sslip.io/api/cities/search?q=$query";
       final response = await http.get(
-        Uri.parse('http://192.168.1.6:4000/api/cities/search?q=${Uri.encodeQueryComponent(query)}'),
+        Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
       );
+      print('$url');
+      
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         if (data['success'] && data['data'] != null) {
           List<Map<String, dynamic>> locations = [];
-          for (var country in data['data']) {
-            for (var city in country['cities']) {
-              final [cityName, code] = city.split(' - ');
-              locations.add({
-                'name': cityName,
-                'address': '${country['country']} ($code)',
-              });
+          
+          // Handle the flat list of city strings
+          if (data['data'] is List) {
+            for (var cityString in data['data']) {
+              if (cityString is String) {
+                final cityParts = cityString.split(' - ');
+                final cityName = cityParts[0];
+                final code = cityParts.length > 1 ? cityParts[1] : '';
+                
+                locations.add({
+                  'name': cityName,
+                  'address': code.isNotEmpty ? '($code)' : '',
+                });
+              }
             }
           }
+          
           setState(() {
             _filteredLocations = locations;
           });
@@ -79,7 +91,9 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
         }
       } else {
         final errorData = jsonDecode(response.body);
-        throw Exception(errorData['error'] ?? 'HTTP error! Status: ${response.statusCode}');
+        throw Exception(
+          errorData['error'] ?? 'HTTP error! Status: ${response.statusCode}',
+        );
       }
     } catch (e) {
       setState(() {
@@ -92,6 +106,7 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
       });
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -125,23 +140,27 @@ class _LocationSearchScreenState extends State<LocationSearchScreen> {
               ),
             ),
           Expanded(
-            child: _filteredLocations.isEmpty && !_isLoading
-                ? const Center(child: Text('Aucun lieu trouvé'))
-                : ListView.builder(
-                    itemCount: _filteredLocations.length,
-                    itemBuilder: (context, index) {
-                      final location = _filteredLocations[index];
-                      return ListTile(
-                        leading: const Icon(Icons.location_pin, color: Colors.grey),
-                        title: Text(location['name']),
-                        subtitle: Text(location['address']),
-                        onTap: () {
-                          widget.onLocationSelected(location['name']);
-                          Navigator.pop(context, location['name']);
-                        },
-                      );
-                    },
-                  ),
+            child:
+                _filteredLocations.isEmpty && !_isLoading
+                    ? const Center(child: Text('Aucun lieu trouvé'))
+                    : ListView.builder(
+                      itemCount: _filteredLocations.length,
+                      itemBuilder: (context, index) {
+                        final location = _filteredLocations[index];
+                        return ListTile(
+                          leading: const Icon(
+                            Icons.location_pin,
+                            color: Colors.grey,
+                          ),
+                          title: Text(location['name']),
+                          subtitle: Text(location['address']),
+                          onTap: () {
+                            widget.onLocationSelected(location['name']);
+                            Navigator.pop(context, location['name']);
+                          },
+                        );
+                      },
+                    ),
           ),
         ],
       ),

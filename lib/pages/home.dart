@@ -1,6 +1,7 @@
 // home.dart (or home_screen.dart)
 import 'package:bladi_go_client/pages/notification.dart';
 import 'package:bladi_go_client/pages/trajetScreen.dart';
+import 'package:bladi_go_client/provider/search_state.dart';
 import 'package:bladi_go_client/provider/user.dart';
 import 'package:bladi_go_client/service/home_service.dart';
 import 'package:bladi_go_client/widget/home_ui/home_header.dart';
@@ -107,8 +108,42 @@ class _HomeState extends State<Home> {
   }
 
   // Callback function passed to SearchForm
-  void _handleSearch(Map<String, String> searchParams) {
-     print("Search triggered with params: $searchParams"); // For debugging
+ void _handleSearch(Map<String, String> searchParams) {
+    print("Search triggered with params: $searchParams"); // For debugging
+
+    // --- Get values, handle potential nulls ---
+    final String fromValue = searchParams['from'] ?? ''; // Default to empty string if null
+    final String toValue = searchParams['to'] ?? '';   // Default to empty string if null
+    final String? dateValue = searchParams['date']; // Keep nullable for check
+    final String? transportTypeValue = searchParams['transportType']; // Keep nullable for check
+
+    // --- Update the Provider ---
+    // Use listen: false as we are only calling a method, not reacting to changes here.
+    try {
+      Provider.of<SearchState>(context, listen: false)
+          .updateSearchDetails(fromValue, toValue);
+    } catch (e) {
+      print("Error updating SearchState provider: $e");
+      // Optionally show a specific error message for provider update failure
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Erreur interne lors de la sauvegarde de la recherche: $e'), backgroundColor: Colors.orange),
+        );
+      }
+      return; // Stop if provider update fails
+    }
+
+    // --- Check required parameters for Navigation ---
+    if (dateValue == null || dateValue.isEmpty || transportTypeValue == null || transportTypeValue.isEmpty) {
+      print("Error: Missing date or transportType for navigation.");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Veuillez renseigner la date et le type de transport.'), backgroundColor: Colors.red),
+        );
+      }
+      return; // Stop execution if required parameters are missing
+    }
+ // For debugging
      try {
         Navigator.push(
           context,
